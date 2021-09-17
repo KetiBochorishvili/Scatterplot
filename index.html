@@ -1,1153 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
 
+<head>
+    <meta charset="utf-8">
     <title>D3 Page Template</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+
     <script type="text/javascript" src="d3.v4.min.js"></script>
-    <script src="tip.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap"
-      rel="stylesheet"
-    />
-
     <style>
-      .d3-tip {
-        font-family: "Inter", sans-serif;
-        text-align: center;
-        font-size: 10px;
-        font-weight: 600;
-        line-height: 1.4;
-        padding: 10px;
-        pointer-events: none !important;
-        color: #8478d6;
-        box-shadow: 0 4px 20px 4px rgba(0, 20, 60, 0.1),
-          0 4px 80px -8px rgba(0, 20, 60, 0.2);
-        background-color: #111457;
-        border-radius: 4px;
-      }
+        body {
+            height: 100vh;
+            background: linear-gradient(to top right, #C6C8D4, #4B58B4);
+            display: flex;
+            justify-content: center;
+        }
 
-      /* Creates a small triangle extender for the tooltip */
-      .d3-tip:after {
-        box-sizing: border-box;
-        display: inline;
-        font-size: 10px;
-        width: 100%;
-        line-height: 1;
-        color: #fff;
-        position: absolute;
-        pointer-events: none;
-      }
+        svg {
+            font-family: 'Inter', sans-serif;
+            position: absolute;
+            top: 50%;
+            -webkit-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
 
-      /* Northward tooltips */
-      .d3-tip.n:after {
-        content: "▼";
-        margin: -1px 0 0 0;
-        top: 100%;
-        left: 0;
-        text-align: center;
-        color: #111457;
-      }
-
-      /* Eastward tooltips */
-      .d3-tip.e:after {
-        content: "◀";
-        margin: -4px 0 0 0;
-        top: 50%;
-        left: -8px;
-      }
-
-      /* Southward tooltips */
-      .d3-tip.s:after {
-        content: "▲";
-        margin: 0 0 1px 0;
-        top: -8px;
-        left: 0;
-        text-align: center;
-      }
-
-      /* Westward tooltips */
-      .d3-tip.w:after {
-        content: "▶";
-        margin: -4px 0 0 -1px;
-        top: 50%;
-        left: 100%;
-      }
-
-      .header {
-        font-weight: bold;
-        color: #cbc9e0;
-        font-size: 11px;
-      }
-
-      .left {
-        float: left;
-      }
-      .right {
-        float: right;
-      }
-      .axis2 line {
-        stroke: #7654c5;
-        opacity: 0.1;
-      }
-      body {
-        background-image: radial-gradient(ellipse at 35% 35%, #1c1363, #040321);
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-      }
-      .container {
-        font-family: "Inter", sans-serif;
-        display: flex;
-        justify-content: center;
-      }
-      svg {
-        font-family: "Inter", sans-serif;
-        position: absolute;
-        background: "url(#grad)";
-        top: 50%;
-        -webkit-transform: translateY(-50%);
-        -ms-transform: translateY(-50%);
-        transform: translateY(-50%);
-      }
-      .axis1 {
-        text-anchor: start;
-      }
-      .axis1 text {
-        font-size: 13px;
-        opacity: 0.6;
-        fill: #a19bdd;
-      }
-
-      .axis2 text {
-        font-size: 13px;
-        opacity: 0.6;
-        fill: #a19bdd;
-      }
-      .legend-text-TRY {
-        cursor: pointer;
-      }
-      .legend-text-GEL {
-        cursor: pointer;
-      }
-      .legend-text-USD {
-        cursor: pointer;
-      }
-
-      .TRY-rects {
-        cursor: pointer;
-      }
-
-      .GEL-rects {
-        cursor: pointer;
-      }
+        .axis text {
+            font-size: 11px;
+            opacity: 0.6;
+        }
     </style>
-  </head>
+</head>
 
-  <body>
-    <div class="container" style="width: 400px; height: 200px"></div>
+<body>
+
 
     <script type="text/javascript">
-      "use strict";
+        // Your beautiful D3 code will go here
 
-      // Your beautiful D3 code will go here
+        var dataset = [];
+        d3.csv("survey2020eng.csv", function (data) {
+            dataset = data;
+            console.log(dataset);
 
-      const parseTime = d3.timeParse("%Y-%m-%d");
-      const formatTime = d3.timeFormat("%b %e");
+            var filtered = dataset.filter(object => object.sex != "no answer" && object.averageMonthlyRevenue != "no answer" && object.experience != "no answer" && object.experience != "don't have");
+            console.log(filtered);
 
-      const rowConverter = function (d) {
-        return {
-          date: parseTime(d.date),
-          TRY: d.TRY,
-          GEL: d.GEL,
-        };
-      };
+            var parseTime = d3.timeParse("%m/%d/%Y");
+            var formatTime = d3.timeFormat("%b %d");
 
-      const dataset = [];
-      d3.csv("USD_GEL_TRY_2020_2021.csv", rowConverter, function (data) {
-        var dataset = data;
-        console.log(dataset);
-        var chart = Chart()
-          .container(".container")
-          .data(dataset)
-          .GEL(GEL)
-          .TRY(TRY)
-          .USD(USD)
-          .render();
-      });
+            var arr = filtered.map(item => ({
+                timestamp: parseTime(item.Timestamp.split(" ")[0]),
+                sex: item.sex,
+                averageMonthlyRevenue: d3.mean(item["averageMonthlyRevenue"].split('-').map(d => d.replace('+', '').replace('k', '000'))),
+                experience: averageExp(item.experience)
+            }));
+            console.log(arr);
 
-      //update for USD
-      function USD({ legend, yScale, attrs, yAxis, chart, tool_tip, svg }) {
-        legend.select(".legend-text-USD").on("click", function () {
-          yScale.domain([
-            d3.min(attrs.data, function (d) {
-              return d.GEL;
-            }),
-            d3.max(attrs.data, function (d) {
-              return d.TRY;
-            }),
-          ]);
+            var w = 1000;
+            var h = 700;
+            var padding = 100;
 
-          yAxis.scale(yScale).ticks(10);
+            var svg = d3.select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h)
+                .style("background", "#FFFFFF");
 
-          chart
-            .select(".axis2")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .call(yAxis);
+            var yScale = d3.scalePow()
+                .domain([
+                    0,
+                    d3.max(arr, function (d) { return d.averageMonthlyRevenue; }) + 5000
+                ])
+                .range([
+                    h - padding, padding
+                ])
+                .exponent(1 / 2);
+            //create y axis
+            var formatted = d3.format(".2s");
+            var yAxis = d3.axisLeft()
+                .scale(yScale)
+                .tickFormat(function (d) { return "₾ " + formatted(d); });
 
-          chart.selectAll(".axis2 path").remove();
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + (padding + ",0)"))
+                .call(yAxis);
 
-          tool_tip.html(function (d, i) {
-            return `
-<table>
-<tr><th colspan="2" class="header">${formatTimeTable(
-              attrs.data[i].date
-            )} - ${formatTimeTable(attrs.data[i + 4].date)}</th><th></th></tr>
-<tr><th>date</th><th colspan="2">cost of 1$</th></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 4].date
-            )}</td><td class="left">${Math.round(attrs.data[i + 4].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 4].TRY * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 3].date
-            )}</td><td class="left">${Math.round(attrs.data[i + 3].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 3].TRY * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 2].date
-            )}</td><td class="left">${Math.round(attrs.data[i + 2].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 2].TRY * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 1].date
-            )}</td><td class="left">${Math.round(attrs.data[i + 1].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 1].TRY * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i].date
-            )}</td><td class="left">${Math.round(attrs.data[i].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i].TRY * 100) / 100} ₺ </td></tr>
-</table>`;
-          });
+            //xAxis with scalePow
 
-          chart
-            .selectAll(".TRY-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.TRY));
+            var startDate = d3.min(arr, function (d) { return d.timestamp; });
+            var endDate = d3.max(arr, function (d) { return d.timestamp; });
 
-          chart
-            .selectAll(".GEL-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.GEL));
+            var xt = d3.scaleTime()
+                .domain([
+                    startDate,
+                    endDate
+                ])
+                .range([1, w])
+            var xp = d3.scalePow()
+                .exponent(1 / 2)
+                .domain([1, w])
+                .range([1.2 * padding, w - 1.2 * padding])
 
-          chart
-            .selectAll(".GEL-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
+            function x_copy() {
+                var x = function (t) { return xp(xt(t)) }
+                x.domain = xt.domain
+                x.range = xp.range
+                x.copy = x_copy
+                x.tickFormat = xt.tickFormat
+                x.ticks = xt.ticks
+                return x
+            }
+            x = x_copy()
 
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
-                let max = Math.max(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
-                return max - min;
-              }
-            });
 
-          chart
-            .selectAll(".TRY-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                let max = Math.max(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                return max - min;
-              }
-            });
+            xAxis = d3.axisBottom(x)
+                .tickFormat(formatTime)
+                .tickValues([parseTime("10/07/2020"), parseTime("10/11/2020"), parseTime("10/18/2020"), parseTime("10/25/2020"), parseTime("11/01/2020"), parseTime("11/8/2020"), parseTime("11/15/2020"), parseTime("11/22/2020"), parseTime("11/29/2020"), parseTime("12/6/2020")]);
 
-          svg.select(".Y-label").text("Cost of 1 $");
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + (h - padding) + ")")
+                .call(xAxis);
 
-          svg
-            .select("#blue")
-            .text("₾")
-            .attr("class", null)
-            .attr("class", "legend-text-GEL");
 
-          svg
-            .select("#red")
-            .text("₺")
-            .attr("class", null)
-            .attr("class", "legend-text-TRY");
 
-          attrs.GEL({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.TRY({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.USD({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
+
+            d3.selectAll(".axis path").remove();
+            d3.selectAll(".axis line").remove();
+
+
+            var arr1 = x.ticks().map(item => x(item));
+            arr1.push(x(parseTime("12/6/2020")));
+            arr1.unshift(x(parseTime("10/07/2020")));
+            console.log(arr1);
+            //create bars
+            var barHeight = h - 2 * padding;
+
+            for (var i = 0; i < arr1.length; i += 2) {
+                svg.append("rect")
+                    .attr("x", arr1[i])
+                    .attr("y", padding)
+                    .attr("width", (arr1[i + 1] - arr1[i]))
+                    .attr("height", barHeight)
+                    .attr("fill", "#F4F5FC");
+            }
+
+            //create heading
+            svg.append("text")
+                .text("Tech Survey")
+                .attr("x", padding / 2)
+                .attr("y", padding / 2)
+                .attr("font-size", "30px")
+                .attr("font-weight", "bold")
+                .attr("fill", "black");
+            // create scale for radius matching
+            var rScale = d3.scaleLinear()
+                .domain([0, d3.max(arr, function (d) { return d.experience; })])
+                .range([5, 20]);
+            //create bubbles
+            svg.selectAll("circle")
+                .data(arr)
+                .enter()
+                .append("circle")
+                .attr("cx", function (d) {
+                    return x(d.timestamp);
+                })
+                .attr("cy", function (d) {
+                    return yScale(d.averageMonthlyRevenue);
+                })
+                .attr("r", function (d) {
+                    return rScale(d.experience)
+                })
+                .attr("fill", function (d) {
+                    if (d.sex === "female") {
+                        return "url(#grad1)";
+                    } else {
+                        return "url(#grad2)";
+                    }
+                })
+                .attr("opacity", 0.7);
+
+            //axis labels
+
+            svg.append("text")
+                .text("Response Date")
+                .attr("x", w / 2 - 35)
+                .attr("y", h - padding / 2)
+                .attr("font-size", "17px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6");
+
+            svg.append("text")
+                .text("──      Revenue      ⟶")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("font-size", "17px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6")
+                .attr("transform", "translate(50,400) rotate(-90)");;
+
+
+            //legend
+            var pad = 40;
+            svg.append("text")
+                .attr("id", "legendt")
+                .text("Experience")
+                .attr("x", w - 2.5 * padding - 20)
+                .attr("y", padding + pad)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .style("font-weight", "bolder")
+
+
+            svg.append("circle")
+                .attr("cx", w - 2.5 * padding)
+                .attr("cy", padding + 2 * pad)
+                .attr("r", 20)
+                .style("stroke-dasharray", ("3,2"))
+                .style("stroke", "black")
+                .style("fill", "none")
+                .attr("opacity", "0.6");
+
+            svg.append("circle")
+                .attr("cx", w - 2.5 * padding)
+                .attr("cy", padding + 2 * pad)
+                .attr("r", 1.4)
+                .style("fill", "grey");
+
+
+
+            svg.append("circle")
+                .attr("cx", w - 2.5 * padding)
+                .attr("cy", padding + pad + 55)
+                .attr("r", 5)
+                .style("stroke-dasharray", ("3,1"))
+                .style("stroke", "black")
+                .style("fill", "none")
+                .attr("opacity", "0.6");
+
+
+            svg.append("line")
+                .style("stroke", "black")
+                .style("stroke-dasharray", ("3,1"))
+                .attr("opacity", "0.6")
+                .attr("x1", w - 2.5 * padding)
+                .attr("x2", w - 2.1 * padding)
+                .attr("y1", padding + pad + 40)
+                .attr("y2", padding + pad + 40);
+
+            svg.append("line")
+                .style("stroke", "black")
+                .style("stroke-dasharray", ("3,1"))
+                .attr("opacity", "0.6")
+                .attr("x1", w - 2.5 * padding)
+                .attr("x2", w - 2.1 * padding)
+                .attr("y1", padding + pad + 55)
+                .attr("y2", padding + pad + 55);
+
+
+            var minExp = d3.min(arr, function (d) { return d.experience; });
+            var maxExp = d3.max(arr, function (d) { return d.experience; });
+            svg.append("text")
+                .text("≤" + maxExp + " years")
+                .attr("x", w - 2.1 * padding + 2)
+                .attr("y", padding + pad + 43)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6");
+
+            svg.append("text")
+                .text(">" + minExp + " years")
+                .attr("x", w - 2.1 * padding + 2)
+                .attr("y", padding + pad + 60)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6");
+
+            svg.append("text")
+                .text("Sex")
+                .attr("x", w - 4 * padding)
+                .attr("y", padding + pad)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .attr("font-weight", "bolder")
+
+
+            svg.append("circle")
+                .attr("cx", w - 4 * padding + 8)
+                .attr("cy", padding + 68)
+                .attr("r", 8)
+                .style("fill", "url(#grad1)")
+                .attr("opacity", "0.7");
+
+            svg.append("circle")
+                .attr("cx", w - 4 * padding + 8)
+                .attr("cy", padding + 92)
+                .attr("r", 8)
+                .style("fill", "url(#grad2)")
+                .attr("opacity", "0.7");
+
+            svg.append("text")
+                .text("Female")
+                .attr("x", w - 4 * padding + 30)
+                .attr("y", padding + 70)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6");
+
+            svg.append("text")
+                .text("Male")
+                .attr("x", w - 4 * padding + 30)
+                .attr("y", padding + 94)
+                .attr("font-size", "11px")
+                .attr("fill", "black")
+                .attr("opacity", "0.6");
+
+            //gradient for svg and body
+            var colors = ["rgb(242, 67, 108)", "rgb(234, 138, 159)"]
+            var grad1 = svg.append('defs')
+                .append('linearGradient')
+                .attr('id', 'grad1')
+                .attr('x1', '0%')
+                .attr('x2', '100%')
+                .attr('y1', '100%')
+                .attr('y2', '0%');
+
+            grad1.selectAll('stop')
+                .data(colors)
+                .enter()
+                .append('stop')
+                .style('stop-color', function (d) { return d; })
+                .attr('offset', function (d, i) {
+                    return 100 * (i / (colors.length - 1)) + '%';
+                })
+
+            var colors2 = ["rgb(54, 25, 160)", "rgb(153, 129, 239)"];
+            var grad2 = svg.append('defs')
+                .append('linearGradient')
+                .attr('id', 'grad2')
+                .attr('x1', '0%')
+                .attr('x2', '100%')
+                .attr('y1', '100%')
+                .attr('y2', '0%');
+
+            grad2.selectAll('stop')
+                .data(colors2)
+                .enter()
+                .append('stop')
+                .style('stop-color', function (d) { return d; })
+                .attr('offset', function (d, i) {
+                    return 100 * (i / (colors.length - 1)) + '%';
+                })
         });
-      }
 
-      //update for GEL
-      function GEL({ legend, yScale, attrs, yAxis, chart, tool_tip, svg }) {
-        d3.select(".legend-text-GEL").on("click", function () {
-          yScale.domain([
-            d3.min(attrs.data, function (d) {
-              return 1 / d.GEL;
-            }) - 0.3,
-            d3.max(attrs.data, function (d) {
-              return d.TRY / d.GEL;
-            }),
-          ]);
+        function averageExp(str) {
+            if (str.indexOf("+") === -1) {
+                return (parseInt(str.split(" ")[0].split("-")[0]) + parseInt(str.split(" ")[0].split("-")[1])) / 2;
+            } else {
+                return parseInt(str.replace("+", ""));
+            }
+        }
 
-          yAxis.scale(yScale).ticks(10);
 
-          chart
-            .select(".axis2")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .call(yAxis);
 
-          chart.selectAll(".axis2 path").remove();
-
-          tool_tip.html(function (d, i) {
-            return `
-<table>
-<tr><th colspan="2" class="header">${formatTimeTable(
-              attrs.data[i].date
-            )} - ${formatTimeTable(attrs.data[i + 4].date)}</th><th></th></tr>
-<tr><th>date</th><th colspan="2">cost of 1 ₾</th></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 4].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 4].TRY / attrs.data[i + 4].GEL) * 100) / 100} $ </td><td class="right">${Math.round((1 / attrs.data[i + 4].GEL) * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 3].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 3].TRY / attrs.data[i + 3].GEL) * 100) / 100} $ </td><td class="right">${Math.round((1 / attrs.data[i + 3].GEL) * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 2].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 2].TRY / attrs.data[i + 2].GEL) * 100) / 100} $ </td><td class="right">${Math.round((1 / attrs.data[i + 2].GEL) * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 1].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 1].TRY / attrs.data[i + 1].GEL) * 100) / 100} $ </td><td class="right">${Math.round((1 / attrs.data[i + 1].GEL) * 100) / 100} ₺ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i].date
-            )}</td><td class="left">${Math.round((attrs.data[i].TRY / attrs.data[i].GEL) * 100) / 100} $ </td><td class="right">${Math.round((1 / attrs.data[i].GEL) * 100) / 100} ₺ </td></tr>
-</table>`;
-          });
-
-          chart
-            .selectAll(".TRY-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.TRY / d.GEL));
-
-          chart
-            .selectAll(".GEL-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(1 / d.GEL));
-
-          chart
-            .selectAll(".GEL-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(1 / attrs.data[i].GEL),
-                  yScale(1 / attrs.data[i + 1].GEL),
-                  yScale(1 / attrs.data[i + 2].GEL),
-                  yScale(1 / attrs.data[i + 3].GEL),
-                  yScale(1 / attrs.data[i + 4].GEL)
-                );
-                console.log(yScale(1 / attrs.data[i].GEL));
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(1 / attrs.data[i].GEL),
-                  yScale(1 / attrs.data[i + 1].GEL),
-                  yScale(1 / attrs.data[i + 2].GEL),
-                  yScale(1 / attrs.data[i + 3].GEL),
-                  yScale(1 / attrs.data[i + 4].GEL)
-                );
-                let max = Math.max(
-                  yScale(1 / attrs.data[i].GEL),
-                  yScale(1 / attrs.data[i + 1].GEL),
-                  yScale(1 / attrs.data[i + 2].GEL),
-                  yScale(1 / attrs.data[i + 3].GEL),
-                  yScale(1 / attrs.data[i + 4].GEL)
-                );
-                return max - min;
-              }
-            });
-
-          chart
-            .selectAll(".TRY-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY / attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].TRY / attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].TRY / attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].TRY / attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].TRY / attrs.data[i + 4].GEL)
-                );
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let max = Math.max(
-                  yScale(attrs.data[i].TRY / attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].TRY / attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].TRY / attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].TRY / attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].TRY / attrs.data[i + 4].GEL)
-                );
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY / attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].TRY / attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].TRY / attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].TRY / attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].TRY / attrs.data[i + 4].GEL)
-                );
-                return max - min;
-              }
-            });
-
-          svg.select(".Y-label").text("Cost of 1 ₾");
-
-          svg
-            .select("#blue")
-            .text("$")
-            .attr("class", null)
-            .attr("class", "legend-text-USD");
-
-          svg
-            .select("#red")
-            .text("₺")
-            .attr("class", null)
-            .attr("class", "legend-text-TRY")
-            .on("mouseover", tool_tip.show)
-            .on("mouseout", tool_tip.hide);
-
-          attrs.GEL({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.TRY({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.USD({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-        });
-      }
-
-      //update for TRY
-      function TRY({ legend, yScale, attrs, yAxis, chart, tool_tip, svg }) {
-        legend.select(".legend-text-TRY").on("click", function () {
-          yScale.domain([
-            d3.min(attrs.data, function (d) {
-              return 1 / d.TRY;
-            }) - 0.05,
-            d3.max(attrs.data, function (d) {
-              return d.GEL / d.TRY + 0.05;
-            }),
-          ]);
-
-          yAxis.scale(yScale).ticks(10);
-
-          chart
-            .select(".axis2")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .call(yAxis);
-
-          chart.selectAll(".axis2 path").remove();
-
-          tool_tip.html(function (d, i) {
-            return `
-<table>
-<tr><th colspan="2" class="header">${formatTimeTable(
-              attrs.data[i].date
-            )} - ${formatTimeTable(attrs.data[i + 4].date)}</th><th></th></tr>
-<tr><th>date</th><th colspan="2">cost of 1 ₺</th></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 4].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 4].GEL / attrs.data[i + 4].TRY) * 100) / 100} ₾ </td><td class="right">${Math.round((1 / attrs.data[i + 4].TRY) * 100) / 100} $ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 3].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 3].GEL / attrs.data[i + 3].TRY) * 100) / 100} ₾ </td><td class="right">${Math.round((1 / attrs.data[i + 3].TRY) * 100) / 100} $ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 2].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 2].GEL / attrs.data[i + 2].TRY) * 100) / 100} ₾ </td><td class="right">${Math.round((1 / attrs.data[i + 2].TRY) * 100) / 100} $ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i + 1].date
-            )}</td><td class="left">${Math.round((attrs.data[i + 1].GEL / attrs.data[i + 1].TRY) * 100) / 100} ₾ </td><td class="right">${Math.round((1 / attrs.data[i + 1].TRY) * 100) / 100} $ </td></tr>
-<tr><td>${formatDate(
-              attrs.data[i].date
-            )}</td><td class="left">${Math.round((attrs.data[i].GEL / attrs.data[i].TRY) * 100) / 100} ₾ </td><td class="right">${Math.round((1 / attrs.data[i].TRY) * 100) / 100} $ </td></tr>
-</table>`;
-          });
-
-          chart
-            .selectAll(".GEL-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(1 / d.TRY));
-
-          chart
-            .selectAll(".TRY-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.GEL / d.TRY));
-
-          chart
-            .selectAll(".TRY-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL / attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].GEL / attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].GEL / attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].GEL / attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].GEL / attrs.data[i + 4].TRY)
-                );
-
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL / attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].GEL / attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].GEL / attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].GEL / attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].GEL / attrs.data[i + 4].TRY)
-                );
-                let max = Math.max(
-                  yScale(attrs.data[i].GEL / attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].GEL / attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].GEL / attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].GEL / attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].GEL / attrs.data[i + 4].TRY)
-                );
-                return max - min;
-              }
-            });
-
-          chart
-            .selectAll(".GEL-rects")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(1 / attrs.data[i].TRY),
-                  yScale(1 / attrs.data[i + 1].TRY),
-                  yScale(1 / attrs.data[i + 2].TRY),
-                  yScale(1 / attrs.data[i + 3].TRY),
-                  yScale(1 / attrs.data[i + 4].TRY)
-                );
-                return min;
-              }
-            })
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(1 / attrs.data[i].TRY),
-                  yScale(1 / attrs.data[i + 1].TRY),
-                  yScale(1 / attrs.data[i + 2].TRY),
-                  yScale(1 / attrs.data[i + 3].TRY),
-                  yScale(1 / attrs.data[i + 4].TRY)
-                );
-                let max = Math.max(
-                  yScale(1 / attrs.data[i].TRY),
-                  yScale(1 / attrs.data[i + 1].TRY),
-                  yScale(1 / attrs.data[i + 2].TRY),
-                  yScale(1 / attrs.data[i + 3].TRY),
-                  yScale(1 / attrs.data[i + 4].TRY)
-                );
-                return max - min;
-              }
-            });
-
-          svg.select(".Y-label").text("Cost of 1 ₺");
-
-          svg
-            .select("#blue")
-            .text("$")
-            .attr("class", null)
-            .attr("class", "legend-text-USD");
-
-          svg
-            .select("#red")
-            .text("₾")
-            .attr("class", null)
-            .attr("class", "legend-text-GEL");
-
-          attrs.GEL({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.TRY({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.USD({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-        });
-      }
-
-      function Chart() {
-        // Exposed variables
-        const attrs = {
-          svgWidth: 900,
-          svgHeight: 700,
-          marginTop: 30,
-          marginBottom: 15,
-          marginRight: 15,
-          marginLeft: 30,
-          container: "body",
-          defaultTextFill: "#2C3E50",
-          defaultFont: "Inter",
-          data: null,
-          GEL: (d) => d,
-          TRY: (d) => d,
-          USD: (d) => d,
-        };
-
-        //Main chart object
-        const main = function () {
-          //Drawing containers
-          const container = d3.select(attrs.container);
-
-          //Calculated properties
-          const calc = {
-            id: null,
-            chartTopMargin: null,
-            chartLeftMargin: null,
-            chartWidth: null,
-            chartHeight: null,
-            legendX: null,
-            xAxisY: null,
-          };
-
-          calc.chartLeftMargin = attrs.marginLeft;
-          calc.chartTopMargin = attrs.marginTop;
-          calc.chartWidth =
-            attrs.svgWidth - 2 * attrs.marginRight - 2 * calc.chartLeftMargin;
-          calc.chartHeight =
-            attrs.svgHeight - 2 * attrs.marginBottom - 2 * calc.chartTopMargin;
-          calc.legendX = attrs.svgWidth - 100;
-          calc.xAxisY = calc.chartTopMargin + calc.chartHeight;
-          //Add svg
-          const svg = container
-            ._add({ tag: "svg", className: "svg-chart-container" })
-            .attr("width", attrs.svgWidth)
-            .attr("height", attrs.svgHeight)
-            .attr("font-family", attrs.defaultFont);
-
-          //Add container g element
-          const chart = svg
-            ._add({ tag: "g", className: "chart-g" })
-            .attr(
-              "transform",
-              "translate(" +
-                calc.chartLeftMargin +
-                "," +
-                calc.chartTopMargin +
-                ")"
-            )
-            .attr("width", calc.chartWidth)
-            .attr("height", calc.chartHeight);
-
-          //scales
-
-          const startDate = d3.min(attrs.data, function (d) {
-            return d.date;
-          });
-          const endDate = d3.max(attrs.data, function (d) {
-            return d.date;
-          });
-
-          const formatTime = d3.timeFormat("%b %Y");
-          const formatTimeTable = d3.timeFormat("%e %b %Y");
-          const formatDate = d3.timeFormat("%e");
-
-          const xScale = d3
-            .scaleTime()
-            .domain([startDate, endDate])
-            .range([5, 5 + calc.chartWidth]);
-
-          const yScale = d3
-            .scaleLinear()
-            .domain([
-              d3.min(attrs.data, function (d) {
-                return d.GEL;
-              }),
-              d3.max(attrs.data, function (d) {
-                return d.TRY;
-              }),
-            ])
-            .range([calc.chartHeight, 0]);
-
-          //Define X axis
-          const xAxis = d3.axisBottom().scale(xScale).tickFormat(formatTime);
-
-          //Define Y axis
-          const yAxis = d3
-            .axisLeft()
-            .scale(yScale)
-            .tickSize(-calc.chartWidth)
-            .ticks(10);
-
-          //Create X axis
-          chart
-            ._add({
-              tag: "g",
-              className: "axis1",
-            })
-            .attr("transform", "translate(0," + calc.chartHeight + ")")
-            .call(xAxis);
-
-          //Create Y axis
-          chart
-            ._add({
-              tag: "g",
-              className: "axis2",
-            })
-            .attr("transform", "translate(0,0)")
-            .call(yAxis);
-
-          chart.selectAll(".axis1 path").remove();
-          chart.selectAll(".axis1 line").remove();
-          chart.selectAll(".axis2 path").remove();
-
-          const tool_tip = d3
-            .tip()
-            .attr("class", "d3-tip")
-            .offset([-8, 0])
-            .html(function (d, i) {
-              return `
-        <table>
-          <tr><th class="header" colspan="2">${formatTimeTable(
-            attrs.data[i].date
-          )} - ${formatTimeTable(attrs.data[i + 4].date)}</th><th></th></tr>
-          <tr><th>date</th><th colspan="2">cost of 1$</th></tr>
-          <tr><td>${formatDate(
-            attrs.data[i + 4].date
-          )}</td><td class="left">${Math.round(attrs.data[i + 4].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 4].TRY * 100) / 100} ₺ </td></tr>
-          <tr><td>${formatDate(
-            attrs.data[i + 3].date
-          )}</td><td class="left">${Math.round(attrs.data[i + 3].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 3].TRY * 100) / 100} ₺ </td></tr>
-          <tr><td>${formatDate(
-            attrs.data[i + 2].date
-          )}</td><td class="left">${Math.round(attrs.data[i + 2].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 2].TRY * 100) / 100} ₺ </td></tr>
-          <tr><td>${formatDate(
-            attrs.data[i + 1].date
-          )}</td><td class="left">${Math.round(attrs.data[i + 1].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i + 1].TRY * 100) / 100} ₺ </td></tr>
-          <tr><td>${formatDate(
-            attrs.data[i].date
-          )}</td><td class="left">${Math.round(attrs.data[i].GEL * 100) / 100} ₾ </td><td class="right">${Math.round(attrs.data[i].TRY * 100) / 100} ₺ </td></tr>
-          </table>`;
-            });
-          svg.call(tool_tip);
-
-          //  chart elements
-
-          chart
-            ._add({
-              tag: "rect",
-              className: "TRY-rects",
-              data: attrs.data,
-            })
-            .attr("x", (d, i) => {
-              if (i % 5 == 0) {
-                i = i + 2;
-              } else if (i % 5 == 1) {
-                i = i + 1;
-              } else if (i % 5 == 3) {
-                i = i - 1;
-              } else if (i % 5 == 4) {
-                i = i - 2;
-              }
-              return xScale(attrs.data[i].date) - 1;
-            })
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                return min;
-              }
-            })
-            .attr("width", 2)
-            .attr("height", 0)
-            .attr("fill", "#A14071")
-            .attr("opacity", 1)
-            .on("mouseover", tool_tip.show)
-            .on("mouseout", tool_tip.hide);
-
-          chart
-            ._add({
-              tag: "circle",
-              className: "TRY-points",
-              data: attrs.data,
-            })
-            .attr("r", 1)
-            .attr("fill", "#EE9161")
-            .attr("cx", (d, i) => {
-              if (i % 5 == 0) {
-                i = i + 2;
-              } else if (i % 5 == 1) {
-                i = i + 1;
-              } else if (i % 5 == 3) {
-                i = i - 1;
-              } else if (i % 5 == 4) {
-                i = i - 2;
-              }
-              return xScale(attrs.data[i].date);
-            })
-            .attr("cy", calc.chartHeight);
-
-          chart
-            ._add({
-              tag: "circle",
-              className: "GEL-points",
-              data: attrs.data,
-            })
-            .attr("r", 1)
-            .attr("fill", "#5DCFE9")
-            .attr("cx", (d, i) => {
-              if (i % 5 == 0) {
-                i = i + 2;
-              } else if (i % 5 == 1) {
-                i = i + 1;
-              } else if (i % 5 == 3) {
-                i = i - 1;
-              } else if (i % 5 == 4) {
-                i = i - 2;
-              }
-              return xScale(attrs.data[i].date);
-            })
-            .attr("cy", calc.chartHeight);
-
-          chart
-            ._add({
-              tag: "rect",
-              className: "GEL-rects",
-              data: attrs.data,
-            })
-            .attr("x", (d, i) => {
-              if (i % 5 == 0) {
-                i = i + 2;
-              } else if (i % 5 == 1) {
-                i = i + 1;
-              } else if (i % 5 == 3) {
-                i = i - 1;
-              } else if (i % 5 == 4) {
-                i = i - 2;
-              }
-              return xScale(attrs.data[i].date) - 1;
-            })
-            .attr("y", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
-                return min;
-              }
-            })
-            .attr("width", 2)
-            .attr("height", 0)
-            .attr("fill", "#5DCFE9")
-            .attr("opacity", 0.2)
-            .on("mouseover", tool_tip.show)
-            .on("mouseout", tool_tip.hide);
-
-          svg
-            ._add({
-              tag: "text",
-              className: "Y-label",
-            })
-            .attr("x", calc.chartLeftMargin)
-            .attr("y", 15)
-            .text("Cost of 1 $")
-            .attr("fill", "#A19BDD");
-
-          //initial animation
-          chart
-            .selectAll(".TRY-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.TRY));
-
-          chart
-            .selectAll(".GEL-points")
-            .transition()
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("cy", (d, i) => yScale(d.GEL));
-
-          chart
-            .selectAll(".GEL-rects")
-            .transition()
-            .delay(500)
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let min = Math.min(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
-                let max = Math.max(
-                  yScale(attrs.data[i].GEL),
-                  yScale(attrs.data[i + 1].GEL),
-                  yScale(attrs.data[i + 2].GEL),
-                  yScale(attrs.data[i + 3].GEL),
-                  yScale(attrs.data[i + 4].GEL)
-                );
-                return max - min;
-              }
-            });
-
-          chart
-            .selectAll(".TRY-rects")
-            .transition()
-            .delay(500)
-            .duration(500)
-            .ease(d3.easeLinear)
-            .attr("height", (d, i) => {
-              if (i % 5 !== 0) {
-                return 0;
-              } else {
-                let max = Math.max(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                let min = Math.min(
-                  yScale(attrs.data[i].TRY),
-                  yScale(attrs.data[i + 1].TRY),
-                  yScale(attrs.data[i + 2].TRY),
-                  yScale(attrs.data[i + 3].TRY),
-                  yScale(attrs.data[i + 4].TRY)
-                );
-                return max - min;
-              }
-            });
-
-          //legend
-
-          const legend = svg
-            ._add({
-              tag: "g",
-              className: "legend",
-            })
-            .attr("transform", "translate(" + calc.legendX + ",5)"); //აქაც დავამატე calc.legendX ზემოთ
-
-          //GEL circle blue
-          legend
-            ._add({
-              tag: "circle",
-              className: "legend-circle",
-            })
-            .attr("r", 3)
-            .attr("fill", "#5DCFE9")
-            .attr("cx", 10)
-            .attr("cy", 10);
-
-          //GEL text
-
-          legend
-            ._add({
-              tag: "text",
-              className: "legend-text-GEL",
-            })
-            .attr("id", "blue")
-            .attr("x", 20)
-            .attr("y", 10)
-            .text("₾")
-            .attr("fill", "#9287D9");
-
-          //TRY circle red
-          legend
-            ._add({
-              tag: "circle",
-              className: "legend-circle1",
-            })
-            .attr("r", 3)
-            .attr("fill", "#A14071")
-            .attr("cx", 45)
-            .attr("cy", 10);
-
-          //TRY text
-
-          legend
-            ._add({
-              tag: "text",
-              className: "legend-text-TRY",
-            })
-            .attr("id", "red")
-            .attr("x", 55)
-            .attr("y", 10)
-            .text("₺")
-            .attr("fill", "#9287D9");
-
-          attrs.GEL({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-          attrs.TRY({ legend, yScale, attrs, yAxis, chart, tool_tip, svg });
-        };
-
-        //----------- PROTOTYPE FUNCTIONS  ----------------------
-        d3.selection.prototype._add = function ({ className, tag, data }) {
-          var container = this;
-          var localData = data || [selector];
-          var selector = className || selector + "-element";
-
-          // Pattern in action
-          let selection = container
-            .selectAll("." + selector)
-            .data(localData, (d, i) => {
-              if (typeof d === "object") {
-                return d.id || d.key || i;
-              }
-              return i;
-            });
-          selection.exit().remove();
-          selection = selection.enter().append(tag).merge(selection);
-          selection.attr("class", className);
-          return selection;
-        };
-
-        // Run  visual
-        main["render"] = function () {
-          main();
-          return main;
-        };
-
-        main["container"] = function (container) {
-          attrs.container = container;
-          return main;
-        };
-
-        main["data"] = function (data) {
-          attrs.data = data;
-          return main;
-        };
-
-        main["GEL"] = function (GEL) {
-          attrs.GEL = GEL;
-          return main;
-        };
-        main["TRY"] = function (TRY) {
-          attrs.TRY = TRY;
-          return main;
-        };
-        main["USD"] = function (USD) {
-          attrs.USD = USD;
-          return main;
-        };
-
-        return main;
-      }
     </script>
-  </body>
+
+
+</body>
+
 </html>
